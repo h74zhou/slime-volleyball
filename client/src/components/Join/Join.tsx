@@ -71,10 +71,10 @@ const Join = () => {
               margin="normal"
               required
               fullWidth
-              id="username"
-              label="User Name"
-              name="username"
-              autoComplete="username"
+              id="playername"
+              label="Player Name"
+              name="playername"
+              autoComplete="playername"
               autoFocus
               onChange={(e) => setName(e.target.value)}
             />
@@ -84,7 +84,7 @@ const Join = () => {
               required
               fullWidth
               name="room"
-              label="Room Number"
+              label="Room Name"
               type="room"
               id="room"
               autoComplete="current-room"
