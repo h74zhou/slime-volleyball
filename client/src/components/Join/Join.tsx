@@ -8,6 +8,7 @@ import Grid from '@material-ui/core/Grid';
 import SportsVolleyballIcon from '@material-ui/icons/SportsVolleyball';
 import Typography from '@material-ui/core/Typography';
 import { makeStyles } from '@material-ui/core/styles';
+import { Link } from 'react-router-dom';
 
 import RoomList from './RoomList';
 
@@ -43,10 +44,12 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 const Join = () => {
-  const [name, setName] = useState('');
-  const [room, setRoom] = useState('');
+  const [name, setName] = useState<string | null>('');
+  const [room, setRoom] = useState<string | null>('');
 
   const classes = useStyles();
+
+  const shouldDisableEnterButton = ((name && name.length > 0) && (room && room.length > 0)) ? false : true
 
   return (
     <Grid container component="main" className={classes.root}>
@@ -73,6 +76,7 @@ const Join = () => {
               name="username"
               autoComplete="username"
               autoFocus
+              onChange={(e) => setName(e.target.value)}
             />
             <TextField
               variant="outlined"
@@ -84,16 +88,20 @@ const Join = () => {
               type="room"
               id="room"
               autoComplete="current-room"
+              onChange={(e) => setRoom(e.target.value)}
             />
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              Enter Game Room
-            </Button>
+            <Link onClick={e => shouldDisableEnterButton ? e.preventDefault() : null} to={`/game?name=${name}&room=${room}`} style={{ textDecoration: 'none' }}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+                disabled={shouldDisableEnterButton}
+              >
+                Enter Game Room
+              </Button>
+            </Link>
           </form>
         </div>
       </Grid>

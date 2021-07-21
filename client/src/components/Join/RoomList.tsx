@@ -54,7 +54,7 @@ export default function RoomList() {
     <Paper elevation={6} style={{maxHeight: 700, maxWidth: 500, overflow: 'auto'}}>
       <List className={classes.root} subheader={ListHeader}>
         {generateList(10).map((user) => (
-          <ListItem className={classes.listItemRoot}>
+          <ListItem className={classes.listItemRoot} key={user.roomNumber}>
             <ListItemAvatar >
               <Avatar className={classes.avatar}>
                 <AccountCircleIcon />
