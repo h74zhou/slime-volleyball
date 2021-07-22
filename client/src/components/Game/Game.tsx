@@ -50,7 +50,10 @@ const Game = ({location}) => {
 
 
   return (
-    <Canvas/>
+    <div style={{justifyContent: "center", textAlign: "center"}}>
+      <Canvas/>
+    </div>
+    
   )
 }
 
