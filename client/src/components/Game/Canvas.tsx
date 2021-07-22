@@ -5,6 +5,7 @@ const Canvas = props => {
   const keyUp = useKeyPress('ArrowUp');
   const keyLeft = useKeyPress('ArrowLeft');
   const keyRight = useKeyPress('ArrowRight');
+  const { sendMove, upPressed, leftPressed, rightPressed, released, socket, ...otherProps } = props;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -58,22 +59,40 @@ const Canvas = props => {
 
   useEffect(() => {
     if (keyLeft) {
-      playerRef.current.dx = -playerRef.current.speed;   
+      sendMove('ArrowLeft');
     }
     if (keyRight) {
-      playerRef.current.dx = playerRef.current.speed;
+      sendMove('ArrowRight');
     }
-    if (!keyLeft && !keyRight) {
-      playerRef.current.dx = 0;
+    if (socket != null && !keyLeft && !keyRight) {
+      console.log("CLIENT: send stop horizontal move");
+      sendMove('StopHorizontal');
     }
-  }, [keyLeft, keyRight]);
+  }, [keyLeft, keyRight])
+
+  useEffect(() => {
+    playerRef.current.dx = -playerRef.current.speed
+  }, [leftPressed])
+
+  useEffect(() => {
+    playerRef.current.dx = playerRef.current.speed
+  }, [rightPressed])
+
+  useEffect(() => {
+    playerRef.current.dx = 0;
+  }, [released]);
 
   useEffect(() => {
     if (keyUp && playerRef.current.y === 540) {
-      props.sendMove('ArrowUp');
-      playerRef.current.dy = -5;
+      sendMove('ArrowUp');
     }
   }, [keyUp]);
+
+  useEffect(() => {
+    if (upPressed) {
+      playerRef.current.dy = -5;
+    }
+  }, [upPressed]);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -91,7 +110,7 @@ const Canvas = props => {
     }
   }, [])
   
-  return <canvas id="canvas" width="1000" height="600" style={{backgroundColor: "#4050B5"}} ref={canvasRef} {...props}/>
+  return <canvas id="canvas" width="1000" height="600" style={{backgroundColor: "#4050B5"}} ref={canvasRef} {...otherProps}/>
 }
 
 export default Canvas
