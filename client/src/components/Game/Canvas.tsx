@@ -1,21 +1,10 @@
 import React, { useRef, useEffect, useCallback } from 'react'
 import useKeyPress from './useKeyPress';
-import useMultiKeyPress from './useMultiKeyPress';
-
-function areKeysPressed(keys = [], keysPressed = []) {
-  const required = new Set(keys);
-  for (var elem of keysPressed) {
-    required.delete(elem);
-  }
-  return required.size === 0;
-}
 
 const Canvas = props => {
   const keyUp = useKeyPress('ArrowUp');
-  const keyDown = useKeyPress('ArrowDown');
   const keyLeft = useKeyPress('ArrowLeft');
   const keyRight = useKeyPress('ArrowRight');
-  const keysPressed = useMultiKeyPress();
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
@@ -33,16 +22,6 @@ const Canvas = props => {
   const drag = 1;
 
   const updatePlayerLocation = () => {
-    // Check Left Border
-    // if (playerRef.current.x <= 0) {
-    //   playerRef.current.dx = 0;
-    // } 
-
-    // Check Right Border
-    // if (canvasRef.current != null && playerRef.current.x > canvasRef.current?.width - playerRef.current.w) {
-    //   playerRef.current.dx = 0;
-    // }
-
     playerRef.current.x += playerRef.current.dx;
     playerRef.current.dy += gravity;
     playerRef.current.dy *= drag;
@@ -62,7 +41,6 @@ const Canvas = props => {
       playerRef.current.y = 540;
       playerRef.current.dy = 0;
     }
-    
   };
 
   const drawPlayer = ctx => {
@@ -79,16 +57,20 @@ const Canvas = props => {
   }
 
   useEffect(() => {
-    playerRef.current.dx = keyLeft ? -playerRef.current.speed : 0;
-  }, [keyLeft]);
-
-  useEffect(() => {
-    playerRef.current.dx = keyRight ? playerRef.current.speed : 0;
-  }, [keyRight]);
+    if (keyLeft) {
+      playerRef.current.dx = -playerRef.current.speed;   
+    }
+    if (keyRight) {
+      playerRef.current.dx = playerRef.current.speed;
+    }
+    if (!keyLeft && !keyRight) {
+      playerRef.current.dx = 0;
+    }
+  }, [keyLeft, keyRight]);
 
   useEffect(() => {
     if (keyUp && playerRef.current.y === 540) {
-      console.log("HERUN")
+      props.sendMove('ArrowUp');
       playerRef.current.dy = -5;
     }
   }, [keyUp]);
@@ -109,7 +91,7 @@ const Canvas = props => {
     }
   }, [])
   
-  return <canvas id="canvas" width="1000" height="600" style={{backgroundColor: "#0000FF"}} ref={canvasRef} {...props}/>
+  return <canvas id="canvas" width="1000" height="600" style={{backgroundColor: "#4050B5"}} ref={canvasRef} {...props}/>
 }
 
 export default Canvas

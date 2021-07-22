@@ -24,12 +24,11 @@ io.on('connection', (socket: Socket) => {
       name: name,
       room: room,
     });
-
+    error && console.log("There is an error server side");
     if (error) return callback(error);
 
     socket.join(player.room);
 
-    callback();
   });
 
   socket.on('sendMove', (message, callback) => {

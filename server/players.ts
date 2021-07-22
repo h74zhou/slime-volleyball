@@ -1,6 +1,12 @@
-const players = [];
+type playerType = {
+  id: string,
+  name: string,
+  room: string;
+};
 
-const addPlayer = ({ id, name, room }) => {
+const players : Array<playerType> = [];
+
+const addPlayer = ({ id, name, room } : playerType) => {
   name = name.trim().toLowerCase();
   room = room.trim().toLowerCase();
 
@@ -17,7 +23,7 @@ const addPlayer = ({ id, name, room }) => {
   return {player}
 }
 
-const removePlayer = (id) => {
+const removePlayer = (id : string) => {
   const index = players.findIndex((player) => player.id === id);
 
   if (index !== - 1) {
@@ -25,8 +31,8 @@ const removePlayer = (id) => {
   }
 }
 
-const getPlayer = (id) => players.find((player) => player.id === id);
+const getPlayer = (id : string) => players.find((player) => player.id === id);
 
-const getPlayersInRoom = (room) => players.filter((player) => player.room === room);
+const getPlayersInRoom = (room : string) => players.filter((player) => player.room === room);
 
 module.exports = { addPlayer, removePlayer, getPlayer, getPlayersInRoom};

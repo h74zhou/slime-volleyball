@@ -15,45 +15,45 @@ const Game = ({location}) => {
 
   const ALLOWED_MOVES = ['ArrowUp', 'ArrowLeft', 'ArrowRight'];
 
-  // useEffect(() => {
-  //   const {name, room} = queryString.parse(location.search);
+  useEffect(() => {
+    const {name, room} = queryString.parse(location.search);
 
-  //   socket = io(ENDPOINT);
+    socket = io(ENDPOINT);
 
-  //   typeof name === 'string' && setName(name);
-  //   typeof room === 'string' && setName(room); 
+    typeof name === 'string' && setName(name);
+    typeof room === 'string' && setName(room); 
 
-  //   socket.emit('join', {name, room}, ({error}) => {
-      
-  //   });
+    socket.emit('join', {name, room}, ({error}) => {
+      if (error) {
+        alert(error.message);
+      }
+    });
 
-  //   return () => {
-  //     socket.emit('disconnect');
-  //     socket.off();
-  //   }
-  // }, [ENDPOINT, location.search])
+    return () => {
+      socket.emit('disconnect');
+      socket.off();
+    }
+  }, [ENDPOINT, location.search])
 
-  // useEffect(() => {
-  //   socket.on('message', (move : string) => {
-  //     setMoves([...moves, move]);
-  //   });
-  // }, [moves]);
+  useEffect(() => {
+    socket.on('message', ({player, move}: {player: string, move: string}) => {
+      setMoves([...moves, move]);
+      console.log(`Player pressed: ${move}`)
+    });
+  }, [])
 
-  // useEffect(() => {
-  //   const handleKeyDown = event => {
-	//     const { key } : { key: string} = event
-	//     if (ALLOWED_MOVES.includes(key) && !pressed.includes(key)) {
-	//       setPressed(prevPressed => [...prevPressed, key]);
-  //   	}
-  // 	};
-  // }, [])
-
+  const sendMove = (move) => {
+    if (move) {
+      socket.emit('sendMove', move, () => {
+        console.log("SendMove Callback called!");
+      });
+    };
+  }
 
   return (
     <div style={{justifyContent: "center", textAlign: "center"}}>
-      <Canvas/>
-    </div>
-    
+      <Canvas sendMove={sendMove}/>
+    </div> 
   )
 }
 
