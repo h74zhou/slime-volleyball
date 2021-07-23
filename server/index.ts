@@ -1,6 +1,7 @@
 import express = require('express');
 import { Server, Socket } from "socket.io";
 import http from "http";
+import type { playerType } from "./players"; 
 
 const { addPlayer, removePlayer, getPlayer, getPlayersInRoom } = require('./players.ts');
 
@@ -28,7 +29,23 @@ io.on('connection', (socket: Socket) => {
     if (error) return callback(error);
 
     socket.join(player.room);
-
+    
+    // Determine Player 1 or 2
+    if (getPlayersInRoom(player.room).length == 1) {
+      io.to(player.room).emit('roomData', {
+        playerOne: player.name,
+        playerTwo: null,
+        room: room,
+        numOfPlayers: 1
+      });
+    } else if (getPlayersInRoom(player.room).length == 2) {
+      io.to(player.room).emit('roomData', {
+        playerOne: getPlayersInRoom(player.room).filter(((p : playerType) => p.name != player.name))[0].name,
+        playerTwo: player.name,
+        room: room,
+        numOfPlayers: 2
+      });
+    }
   });
 
   socket.on('sendMove', (message, callback) => {

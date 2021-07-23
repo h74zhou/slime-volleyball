@@ -5,11 +5,26 @@ const Canvas = props => {
   const keyUp = useKeyPress('ArrowUp');
   const keyLeft = useKeyPress('ArrowLeft');
   const keyRight = useKeyPress('ArrowRight');
-  const { sendMove, upPressed, leftPressed, rightPressed, released, socket, ...otherProps } = props;
+  const { 
+    sendMove, 
+    upPressed, 
+    upPressedTwo,
+    leftPressed, 
+    leftPressedTwo,
+    rightPressed, 
+    rightPressedTwo,
+    released, 
+    releasedTwo,
+    socket, 
+    firstPlayer,
+    secondPlayer,
+    name,
+    ...otherProps 
+  } = props;
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
-  const playerRef = useRef({
+  const firstPlayerRef = useRef({
     w: 120,
     h: 120,
     x: 0,
@@ -19,10 +34,20 @@ const Canvas = props => {
     dy: 0,
   });
 
+  const secondPlayerRef = useRef({
+    w: 120,
+    h: 120,
+    x: 400,
+    y: 540,
+    speed: 10,
+    dx: 0,
+    dy: 0,
+  })
+
   const gravity = 0.2;
   const drag = 1;
 
-  const updatePlayerLocation = () => {
+  const updatePlayerLocation = (playerRef) => {
     playerRef.current.x += playerRef.current.dx;
     playerRef.current.dy += gravity;
     playerRef.current.dy *= drag;
@@ -44,12 +69,28 @@ const Canvas = props => {
     }
   };
 
-  const drawPlayer = ctx => {
+  const updateFirstPlayerLocation = () => {
+    updatePlayerLocation(firstPlayerRef);
+  };
+
+  const updateSecondPlayerLocation = () => {
+    updatePlayerLocation(secondPlayerRef);
+  }
+
+  const drawFirstPlayer = ctx => {
     
     ctx.beginPath();
-    ctx.arc(playerRef.current.x + 60, playerRef.current.y + 60, 60, 0, Math.PI, true);
+    ctx.arc(firstPlayerRef.current.x + 60, firstPlayerRef.current.y + 60, 60, 0, Math.PI, true);
     ctx.closePath();
     ctx.fillStyle = '#000000';
+    ctx.fill();
+  }
+
+  const drawSecondPlayer = ctx => {
+    ctx.beginPath();
+    ctx.arc(secondPlayerRef.current.x + 60, secondPlayerRef.current.y + 60, 60, 0, Math.PI, true);
+    ctx.closePath();
+    ctx.fillStyle = '#800000';
     ctx.fill();
   }
 
@@ -65,34 +106,60 @@ const Canvas = props => {
       sendMove('ArrowRight');
     }
     if (socket != null && !keyLeft && !keyRight) {
-      console.log("CLIENT: send stop horizontal move");
       sendMove('StopHorizontal');
     }
   }, [keyLeft, keyRight])
 
   useEffect(() => {
-    playerRef.current.dx = -playerRef.current.speed
+    firstPlayerRef.current.dx = -firstPlayerRef.current.speed
   }, [leftPressed])
 
   useEffect(() => {
-    playerRef.current.dx = playerRef.current.speed
+    secondPlayerRef.current.dx = -secondPlayerRef.current.speed
+  }, [leftPressedTwo])
+
+  useEffect(() => {
+    firstPlayerRef.current.dx = firstPlayerRef.current.speed
   }, [rightPressed])
 
   useEffect(() => {
-    playerRef.current.dx = 0;
+    secondPlayerRef.current.dx = secondPlayerRef.current.speed
+  }, [rightPressedTwo])
+
+  useEffect(() => {
+    firstPlayerRef.current.dx = 0;
   }, [released]);
 
   useEffect(() => {
-    if (keyUp && playerRef.current.y === 540) {
-      sendMove('ArrowUp');
+    secondPlayerRef.current.dx = 0;
+  }, [releasedTwo]);
+
+  useEffect(() => {
+    if (keyUp) {
+      console.log(`Key Up Called, Name is: ${name}`)
+      console.log(`Key Up Called, First Player is: ${firstPlayer}`);
+      console.log(`Key Up Called, Second Player is: ${secondPlayer}`);
+      if (
+        (name === firstPlayer && firstPlayerRef.current.y === 540) ||
+        (name === secondPlayer && secondPlayerRef.current.y === 540)
+      ) {
+        console.log("sending arrow up");
+        sendMove("ArrowUp")
+      }
     }
-  }, [keyUp]);
+  }, [keyUp, firstPlayer, secondPlayer]);
 
   useEffect(() => {
     if (upPressed) {
-      playerRef.current.dy = -5;
+      firstPlayerRef.current.dy = -5;
     }
   }, [upPressed]);
+
+  useEffect(() => {
+    if (upPressedTwo) {
+      secondPlayerRef.current.dy = -5;
+    }
+  }, [upPressedTwo]);
 
   useEffect(() => {
     if (canvasRef.current) {
@@ -101,8 +168,10 @@ const Canvas = props => {
       if (ctx) {
         const render = () => {
           clear(ctx);
-          updatePlayerLocation();
-          drawPlayer(ctx);
+          updateFirstPlayerLocation();
+          updateSecondPlayerLocation();
+          drawFirstPlayer(ctx);
+          drawSecondPlayer(ctx);
           requestAnimationFrame(render);
         }
         render();

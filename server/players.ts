@@ -1,4 +1,4 @@
-type playerType = {
+export type playerType = {
   id: string,
   name: string,
   room: string;
