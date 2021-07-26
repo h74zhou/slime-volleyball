@@ -1,6 +1,11 @@
 import React, { useRef, useEffect, useCallback } from 'react'
 import useKeyPress from './useKeyPress';
 
+const MAX_VELOCITY = 10;
+const PLAYER_ONE_ORIGINAL_X = 120;
+const BALL_STARTING_HEIGHT = 300;
+const PLAYER_TWO_ORIGINAL_X = 880;
+
 const Canvas = props => {
   const keyUp = useKeyPress('ArrowUp');
   const keyLeft = useKeyPress('ArrowLeft');
@@ -47,10 +52,10 @@ const Canvas = props => {
   const volleyBallRef = useRef({
     w: 20,
     h: 20,
-    x: 20,
+    x: 120,
     y: 300,
     speed: 15,
-    dx: 5,
+    dx: 0,
     dy: 5,
   })
 
@@ -68,20 +73,27 @@ const Canvas = props => {
 
     if (canvasRef.current != null && 
         (volleyBallRef.current.x < 0 + volleyBallRef.current.w || 
-          volleyBallRef.current.x > canvasRef.current?.width - volleyBallRef.current.w ||
-          ballPlayerCollision()
+          volleyBallRef.current.x > canvasRef.current?.width - volleyBallRef.current.w
         )
       ) {
       volleyBallRef.current.dx *= -1;
     }
 
-    if (canvasRef.current != null && 
-        (volleyBallRef.current.y < 0 + volleyBallRef.current.w || 
-          volleyBallRef.current.y > canvasRef.current?.height - volleyBallRef.current.h ||
-          ballPlayerCollision()
-        )
-      ) {
+    if (canvasRef.current != null && volleyBallRef.current.y < 0) {
       volleyBallRef.current.dy *= -1;
+    }
+
+    if (ballCollisionPlayer1()) {
+      newCollisionAngle(firstPlayerRef);
+    } else if (ballCollisionPlayer2()) {
+      newCollisionAngle(secondPlayerRef);
+    }
+
+    if (canvasRef.current != null && volleyBallRef.current.y > canvasRef.current?.height - volleyBallRef.current.h) {
+      volleyBallRef.current.x = PLAYER_ONE_ORIGINAL_X;
+      volleyBallRef.current.y = BALL_STARTING_HEIGHT;
+      volleyBallRef.current.dx = 0;
+      volleyBallRef.current.dy = 5;
     }
   };
 
@@ -107,16 +119,47 @@ const Canvas = props => {
     }
   };
 
-  const ballPlayerCollision = () => {
+  const ballCollisionPlayer1 = () => {
     const combinedRadiusFirst = firstPlayerRef.current.w + volleyBallRef.current.w;
-    const combinedRadiusSecond = secondPlayerRef.current.w + volleyBallRef.current.w;
     const yDeltaFirst = Math.abs(volleyBallRef.current.y - firstPlayerRef.current.y);
     const xDeltaFirst = Math.abs(volleyBallRef.current.x - firstPlayerRef.current.x);
+    const deltaDistanceFirst = Math.sqrt(Math.pow(yDeltaFirst, 2) + Math.pow(xDeltaFirst, 2)); 
+    return combinedRadiusFirst >= deltaDistanceFirst 
+  }
+
+  const ballCollisionPlayer2 = () => {
+    const combinedRadiusSecond = secondPlayerRef.current.w + volleyBallRef.current.w;
     const yDeltaSecond = Math.abs(volleyBallRef.current.y - secondPlayerRef.current.y);
     const xDeltaSecond = Math.abs(volleyBallRef.current.x - secondPlayerRef.current.x);
-    const deltaDistanceFirst = Math.sqrt(Math.pow(yDeltaFirst, 2) + Math.pow(xDeltaFirst, 2)); 
     const deltaDistanceSecond = Math.sqrt(Math.pow(yDeltaSecond, 2) + Math.pow(xDeltaSecond, 2)); 
-    return combinedRadiusFirst >= deltaDistanceFirst || combinedRadiusSecond >= deltaDistanceSecond;
+    return combinedRadiusSecond >= deltaDistanceSecond;
+  }
+
+  const newCollisionAngle = (playerRef) => {
+    var xDiff = volleyBallRef.current.x - playerRef.current.x;
+    var yDiff = volleyBallRef.current.y - playerRef.current.y;
+    var absVelocity = Math.abs(volleyBallRef.current.dx) + Math.abs(volleyBallRef.current.dy);
+
+    if (absVelocity > MAX_VELOCITY) {
+      absVelocity = MAX_VELOCITY
+    }
+
+    if (xDiff === 0) {
+      volleyBallRef.current.dy = -1 * absVelocity;
+    } else if (yDiff === 0) {
+      volleyBallRef.current.dx = absVelocity;
+    } else {
+      const angle = Math.atan2(xDiff, yDiff);
+      volleyBallRef.current.dx = -1 * absVelocity * Math.cos(angle);
+      volleyBallRef.current.dy = -1 * absVelocity * Math.sin(angle);
+      if (xDiff < 0) {
+        volleyBallRef.current.dx = volleyBallRef.current.dx * -1;
+        volleyBallRef.current.dy = volleyBallRef.current.dy * -1;
+      }
+    }
+
+    volleyBallRef.current.dx += playerRef.current.dx / 2;
+    volleyBallRef.current.dy += playerRef.current.dy / 2;
   }
 
   const updateFirstPlayerLocation = () => {
