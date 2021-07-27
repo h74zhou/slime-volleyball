@@ -1,10 +1,13 @@
-import React, { useRef, useEffect, useCallback } from 'react'
+import { useRef, useEffect } from 'react'
 import useKeyPress from './useKeyPress';
 
 const MAX_VELOCITY = 10;
 const PLAYER_ONE_ORIGINAL_X = 120;
-const BALL_STARTING_HEIGHT = 300;
 const PLAYER_TWO_ORIGINAL_X = 880;
+const PLAYER_ORIGINAL_Y = 600;
+const BALL_STARTING_HEIGHT = 300;
+const NET_STARTING_X_VALUE = 490;
+const NET_WIDTH = 20;
 
 const Canvas = props => {
   const keyUp = useKeyPress('ArrowUp');
@@ -33,7 +36,7 @@ const Canvas = props => {
     w: 60,
     h: 60,
     x: 120,
-    y: 600,
+    y: PLAYER_ORIGINAL_Y,
     speed: 10,
     dx: 0,
     dy: 0,
@@ -43,7 +46,7 @@ const Canvas = props => {
     w: 60,
     h: 60,
     x: 880,
-    y: 600,
+    y: PLAYER_ORIGINAL_Y,
     speed: 10,
     dx: 0,
     dy: 0,
@@ -53,11 +56,18 @@ const Canvas = props => {
     w: 20,
     h: 20,
     x: 120,
-    y: 300,
+    y: BALL_STARTING_HEIGHT,
     speed: 15,
     dx: 0,
     dy: 5,
-  })
+  });
+
+  const netRef = useRef({
+    w: NET_WIDTH,
+    h: 70,
+    x: NET_STARTING_X_VALUE, 
+    y: 530,
+  });
 
   const gravity = 0.2;
   const drag = 1;
@@ -87,35 +97,68 @@ const Canvas = props => {
       newCollisionAngle(firstPlayerRef);
     } else if (ballCollisionPlayer2()) {
       newCollisionAngle(secondPlayerRef);
+    } else if (ballCollisionNet()) {
+      volleyBallRef.current.dx *= -1;
+      volleyBallRef.current.dy *= -1;
     }
 
     if (canvasRef.current != null && volleyBallRef.current.y > canvasRef.current?.height - volleyBallRef.current.h) {
-      volleyBallRef.current.x = PLAYER_ONE_ORIGINAL_X;
-      volleyBallRef.current.y = BALL_STARTING_HEIGHT;
-      volleyBallRef.current.dx = 0;
-      volleyBallRef.current.dy = 5;
+      resetGame();
     }
   };
 
-  const updatePlayerLocation = (playerRef) => {
-    playerRef.current.x += playerRef.current.dx;
-    playerRef.current.dy += gravity;
-    playerRef.current.dy *= drag;
-    playerRef.current.y += playerRef.current.dy;
+  const resetGame = () => {
+    volleyBallRef.current.x = PLAYER_ONE_ORIGINAL_X;
+    volleyBallRef.current.y = BALL_STARTING_HEIGHT;
+    volleyBallRef.current.dx = 0;
+    volleyBallRef.current.dy = 5;
+    firstPlayerRef.current.x = PLAYER_ONE_ORIGINAL_X;
+    firstPlayerRef.current.y = PLAYER_ORIGINAL_Y;
+    secondPlayerRef.current.x = PLAYER_TWO_ORIGINAL_X;
+    secondPlayerRef.current.y = PLAYER_ORIGINAL_Y;
+  };
+
+  const updateFirstPlayerLocation = () => {
+    firstPlayerRef.current.x += firstPlayerRef.current.dx;
+    firstPlayerRef.current.dy += gravity;
+    firstPlayerRef.current.dy *= drag;
+    firstPlayerRef.current.y += firstPlayerRef.current.dy;
     
-    if (canvasRef.current != null && playerRef.current.x < 0 + playerRef.current.w) {
-      playerRef.current.x = 0 + playerRef.current.w;
-      playerRef.current.dx = 0;
+    if (canvasRef.current != null && firstPlayerRef.current.x < 0 + firstPlayerRef.current.w) {
+      firstPlayerRef.current.x = 0 + firstPlayerRef.current.w;
+      firstPlayerRef.current.dx = 0;
     }
 
-    if (canvasRef.current != null && playerRef.current.x > canvasRef.current?.width - playerRef.current.w) {
-      playerRef.current.x = canvasRef.current?.width - playerRef.current.w;
-      playerRef.current.dx = 0;
+    if (canvasRef.current != null && firstPlayerRef.current.x > NET_STARTING_X_VALUE - firstPlayerRef.current.w) {
+      firstPlayerRef.current.x = NET_STARTING_X_VALUE - firstPlayerRef.current.w;
+      firstPlayerRef.current.dx = 0;
     }
 
-    if (canvasRef.current != null && playerRef.current.y > canvasRef.current.height) {
-      playerRef.current.y = canvasRef.current.height;
-      playerRef.current.dy = 0;
+    if (canvasRef.current != null && firstPlayerRef.current.y > canvasRef.current.height) {
+      firstPlayerRef.current.y = canvasRef.current.height;
+      firstPlayerRef.current.dy = 0;
+    }
+  };
+
+  const updateSecondPlayerLocation = () => {
+    secondPlayerRef.current.x += secondPlayerRef.current.dx;
+    secondPlayerRef.current.dy += gravity;
+    secondPlayerRef.current.dy *= drag;
+    secondPlayerRef.current.y += secondPlayerRef.current.dy;
+    
+    if (canvasRef.current != null && secondPlayerRef.current.x < NET_STARTING_X_VALUE + NET_WIDTH + secondPlayerRef.current.w) {
+      secondPlayerRef.current.x = NET_STARTING_X_VALUE + NET_WIDTH + secondPlayerRef.current.w;
+      secondPlayerRef.current.dx = 0;
+    }
+
+    if (canvasRef.current != null && secondPlayerRef.current.x > canvasRef.current?.width - secondPlayerRef.current.w) {
+      secondPlayerRef.current.x = canvasRef.current?.width - secondPlayerRef.current.w;
+      secondPlayerRef.current.dx = 0;
+    }
+
+    if (canvasRef.current != null && secondPlayerRef.current.y > canvasRef.current.height) {
+      secondPlayerRef.current.y = canvasRef.current.height;
+      secondPlayerRef.current.dy = 0;
     }
   };
 
@@ -125,7 +168,7 @@ const Canvas = props => {
     const xDeltaFirst = Math.abs(volleyBallRef.current.x - firstPlayerRef.current.x);
     const deltaDistanceFirst = Math.sqrt(Math.pow(yDeltaFirst, 2) + Math.pow(xDeltaFirst, 2)); 
     return combinedRadiusFirst >= deltaDistanceFirst 
-  }
+  };
 
   const ballCollisionPlayer2 = () => {
     const combinedRadiusSecond = secondPlayerRef.current.w + volleyBallRef.current.w;
@@ -133,7 +176,28 @@ const Canvas = props => {
     const xDeltaSecond = Math.abs(volleyBallRef.current.x - secondPlayerRef.current.x);
     const deltaDistanceSecond = Math.sqrt(Math.pow(yDeltaSecond, 2) + Math.pow(xDeltaSecond, 2)); 
     return combinedRadiusSecond >= deltaDistanceSecond;
-  }
+  };
+
+  const ballCollisionNet = () => {
+    var distX = Math.abs(volleyBallRef.current.x - netRef.current.x - netRef.current.w / 2);
+    var distY = Math.abs(volleyBallRef.current.y - netRef.current.y - netRef.current.h / 2);
+    
+    if (distX > (netRef.current.w / 2 + volleyBallRef.current.w)) {
+      return false;
+    }
+    if (distY > (netRef.current.h / 2 + volleyBallRef.current.h)) {
+      return false;
+    }
+    if (distX <= (netRef.current.w / 2)) {
+      return true;
+    }
+    if (distY <= (netRef.current.h / 2)) {
+      return true;
+    }
+    var x = distX - netRef.current.w / 2;
+    var y = distY - netRef.current.h / 2;
+    return (x*x+y*y<=(volleyBallRef.current.w * volleyBallRef.current.w));
+  };
 
   const newCollisionAngle = (playerRef) => {
     var xDiff = volleyBallRef.current.x - playerRef.current.x;
@@ -160,15 +224,7 @@ const Canvas = props => {
 
     volleyBallRef.current.dx += playerRef.current.dx / 2;
     volleyBallRef.current.dy += playerRef.current.dy / 2;
-  }
-
-  const updateFirstPlayerLocation = () => {
-    updatePlayerLocation(firstPlayerRef);
   };
-
-  const updateSecondPlayerLocation = () => {
-    updatePlayerLocation(secondPlayerRef);
-  }
 
   const drawFirstPlayer = ctx => {
     ctx.beginPath();
@@ -189,13 +245,18 @@ const Canvas = props => {
   const drawVolleyBall = ctx => {
     ctx.beginPath();
     ctx.arc(volleyBallRef.current.x, volleyBallRef.current.y, volleyBallRef.current.w, 0, Math.PI * 2, true)
-    ctx.fillStyle = '#F5C600';
+    ctx.fillStyle = '#964B00';
     ctx.fill()
+  };
+
+  const drawNet = ctx => {
+    ctx.fillStyle = '#006400';
+    ctx.fillRect(netRef.current.x, netRef.current.y, netRef.current.w, netRef.current.h);
   };
 
   const clear = ctx => {
    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
-  }
+  };
 
   useEffect(() => {
     if (keyLeft) {
@@ -211,19 +272,19 @@ const Canvas = props => {
 
   useEffect(() => {
     firstPlayerRef.current.dx = -firstPlayerRef.current.speed
-  }, [leftPressed])
+  }, [leftPressed]);
 
   useEffect(() => {
     secondPlayerRef.current.dx = -secondPlayerRef.current.speed
-  }, [leftPressedTwo])
+  }, [leftPressedTwo]);
 
   useEffect(() => {
     firstPlayerRef.current.dx = firstPlayerRef.current.speed
-  }, [rightPressed])
+  }, [rightPressed]);
 
   useEffect(() => {
     secondPlayerRef.current.dx = secondPlayerRef.current.speed
-  }, [rightPressedTwo])
+  }, [rightPressedTwo]);
 
   useEffect(() => {
     firstPlayerRef.current.dx = 0;
@@ -268,6 +329,7 @@ const Canvas = props => {
           updateFirstPlayerLocation();
           updateSecondPlayerLocation();
           updateVolleyBallLocation();
+          drawNet(ctx);
           drawFirstPlayer(ctx);
           drawSecondPlayer(ctx);
           drawVolleyBall(ctx);
@@ -278,7 +340,7 @@ const Canvas = props => {
     }
   }, [])
   
-  return <canvas id="canvas" width="1000" height="600" style={{backgroundColor: "#4050B5"}} ref={canvasRef} {...otherProps}/>
+  return <canvas id="canvas" width="1000" height="600" style={{backgroundColor: "#add8e6"}} ref={canvasRef} {...otherProps}/>
 }
 
 export default Canvas
