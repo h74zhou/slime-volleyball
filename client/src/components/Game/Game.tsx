@@ -10,7 +10,9 @@ const Game = ({location}) => {
   const [room, setRoom] = useState<string | null>('');
   const [firstPlayer, setFirstPlayer] = useState<string | null>(null);
   const [secondPlayer, setSecondPlayer] = useState<string | null>(null);
-  
+  const [firstPlayerScore, setFirstPlayerScore] = useState<number>(0);
+  const [secondPlayerScore, setSecondPlayerScore] = useState<number>(0);
+
   // First Player
   const [pressUp, setPressUp] = useState<number>(0);
   const [pressRight, setPressRight] = useState<number>(0);
