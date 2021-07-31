@@ -13,6 +13,7 @@ const Canvas = props => {
   const keyUp = useKeyPress('ArrowUp');
   const keyLeft = useKeyPress('ArrowLeft');
   const keyRight = useKeyPress('ArrowRight');
+  const keyRefresh = useKeyPress('r');
   const { 
     sendMove, 
     upPressed, 
@@ -120,7 +121,7 @@ const Canvas = props => {
 
   const resetGame = () => {
     // Update Score
-    if (canvasRef.current && volleyBallRef.current.x < canvasRef.current?.width) {
+    if (canvasRef.current && volleyBallRef.current.x < canvasRef.current?.width / 2) {
       secondPlayerScoreRef.current += 1;
     } else {
       firstPlayerScoreRef.current += 1;
@@ -283,8 +284,12 @@ const Canvas = props => {
     ctx.fillStyle = '#006400';
     if (firstPlayerScoreRef.current >= 5) {
       ctx.fillText("Player 1 Wins", ctx.canvas.width / 2, 50);
+      ctx.font = '20px arial';
+      ctx.fillText(`Press R to Restart the Game`, ctx.canvas.width / 2, 80);
     } else if (secondPlayerScoreRef.current >= 5) {
       ctx.fillText("Player 2 Wins", ctx.canvas.width / 2, 50);
+      ctx.font = '20px arial';
+      ctx.fillText(`Press R to Restart the Game`, ctx.canvas.width / 2, 80);
     } else {
       ctx.fillText(`${firstPlayerScoreRef.current} - ${secondPlayerScoreRef.current}`, ctx.canvas.width / 2, 50);
     }
@@ -336,6 +341,13 @@ const Canvas = props => {
       }
     }
   }, [keyUp, firstPlayer, secondPlayer]);
+
+  useEffect(() => {
+    if (firstPlayerScoreRef.current >= 5 || secondPlayerScoreRef.current >= 5) {
+      firstPlayerScoreRef.current = 0;
+      secondPlayerScoreRef.current = 0;
+    }
+  }, [keyRefresh])
 
   useEffect(() => {
     if (upPressed) {
