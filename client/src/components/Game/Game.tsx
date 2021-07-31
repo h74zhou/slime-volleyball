@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import io from 'socket.io-client';
 import Canvas from './Canvas';
+import Button from '@material-ui/core/Button';
 
 let socket;
 
@@ -10,8 +11,6 @@ const Game = ({location}) => {
   const [room, setRoom] = useState<string | null>('');
   const [firstPlayer, setFirstPlayer] = useState<string | null>(null);
   const [secondPlayer, setSecondPlayer] = useState<string | null>(null);
-  const [firstPlayerScore, setFirstPlayerScore] = useState<number>(0);
-  const [secondPlayerScore, setSecondPlayerScore] = useState<number>(0);
 
   // First Player
   const [pressUp, setPressUp] = useState<number>(0);
@@ -100,21 +99,26 @@ const Game = ({location}) => {
 
   return (
     <div style={{justifyContent: "center", textAlign: "center"}}>
-      <Canvas 
-        sendMove={sendMove} 
-        upPressed={pressUp} 
-        upPressedTwo={pressUpTwo}
-        leftPressed={pressLeft} 
-        leftPressedTwo={pressLeftTwo}
-        rightPressed={pressRight}
-        rightPressedTwo={pressRightTwo}
-        released={release}
-        releasedTwo={releaseTwo}
-        socket={socket}
-        firstPlayer={firstPlayer}
-        secondPlayer={secondPlayer}
-        name={name}
-      />
+      <div style={{marginBottom: 20}}>
+        <Canvas
+          sendMove={sendMove}
+          upPressed={pressUp}
+          upPressedTwo={pressUpTwo}
+          leftPressed={pressLeft}
+          leftPressedTwo={pressLeftTwo}
+          rightPressed={pressRight}
+          rightPressedTwo={pressRightTwo}
+          released={release}
+          releasedTwo={releaseTwo}
+          socket={socket}
+          firstPlayer={firstPlayer}
+          secondPlayer={secondPlayer}
+          name={name}
+        />
+      </div>
+      <Button variant="contained" color="secondary">
+          Leave Game
+      </Button>
     </div> 
   )
 }

@@ -5,7 +5,7 @@ const MAX_VELOCITY = 10;
 const PLAYER_ONE_ORIGINAL_X = 120;
 const PLAYER_TWO_ORIGINAL_X = 880;
 const PLAYER_ORIGINAL_Y = 600;
-const BALL_STARTING_HEIGHT = 300;
+const BALL_STARTING_HEIGHT = 100;
 const NET_STARTING_X_VALUE = 490;
 const NET_WIDTH = 20;
 
@@ -40,7 +40,11 @@ const Canvas = props => {
     speed: 10,
     dx: 0,
     dy: 0,
+    name: firstPlayer
   });
+
+  const firstPlayerScoreRef = useRef(0);
+  const secondPlayerScoreRef = useRef(0);
 
   const secondPlayerRef = useRef({
     w: 60,
@@ -50,6 +54,7 @@ const Canvas = props => {
     speed: 10,
     dx: 0,
     dy: 0,
+    name: secondPlayer,
   });
 
   const volleyBallRef = useRef({
@@ -73,6 +78,12 @@ const Canvas = props => {
   const drag = 1;
 
   const updateVolleyBallLocation = () => {
+    if (firstPlayerScoreRef.current >= 5 || secondPlayerScoreRef.current >= 5) {
+      volleyBallRef.current.dx = 0;
+      volleyBallRef.current.dy = 0;
+      return;
+    }
+
     volleyBallRef.current.x += volleyBallRef.current.dx;
 
     if (canvasRef.current != null && volleyBallRef.current.y < canvasRef.current?.height - volleyBallRef.current.h * 2) {
@@ -108,6 +119,14 @@ const Canvas = props => {
   };
 
   const resetGame = () => {
+    // Update Score
+    if (canvasRef.current && volleyBallRef.current.x < canvasRef.current?.width) {
+      secondPlayerScoreRef.current += 1;
+    } else {
+      firstPlayerScoreRef.current += 1;
+    }
+
+    // Reset the Location of Objects
     volleyBallRef.current.x = PLAYER_ONE_ORIGINAL_X;
     volleyBallRef.current.y = BALL_STARTING_HEIGHT;
     volleyBallRef.current.dx = 0;
@@ -258,6 +277,19 @@ const Canvas = props => {
    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
   };
 
+  const drawScore = ctx => {
+    ctx.font = '40px arial';
+    ctx.textAlign = 'center'
+    ctx.fillStyle = '#006400';
+    if (firstPlayerScoreRef.current >= 5) {
+      ctx.fillText("Player 1 Wins", ctx.canvas.width / 2, 50);
+    } else if (secondPlayerScoreRef.current >= 5) {
+      ctx.fillText("Player 2 Wins", ctx.canvas.width / 2, 50);
+    } else {
+      ctx.fillText(`${firstPlayerScoreRef.current} - ${secondPlayerScoreRef.current}`, ctx.canvas.width / 2, 50);
+    }
+  }
+
   useEffect(() => {
     if (keyLeft) {
       sendMove('ArrowLeft');
@@ -296,12 +328,10 @@ const Canvas = props => {
 
   useEffect(() => {
     if (keyUp) {
-      console.log("KEY UP was hit");
       if (
         (name === firstPlayer && firstPlayerRef.current.y === canvasRef.current?.height) ||
         (name === secondPlayer && secondPlayerRef.current.y === canvasRef.current?.height)
       ) {
-        console.log("sending arrow up");
         sendMove("ArrowUp")
       }
     }
@@ -333,6 +363,7 @@ const Canvas = props => {
           drawFirstPlayer(ctx);
           drawSecondPlayer(ctx);
           drawVolleyBall(ctx);
+          drawScore(ctx);
           requestAnimationFrame(render);
         }
         render();
