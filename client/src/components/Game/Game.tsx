@@ -6,7 +6,7 @@ import Button from '@material-ui/core/Button';
 
 let socket;
 
-const Game = ({location}) => {
+const Game = ({location, history}) => {
   const [name, setName] = useState<string | null>('');
   const [room, setRoom] = useState<string | null>('');
   const [firstPlayer, setFirstPlayer] = useState<string | null>(null);
@@ -46,7 +46,7 @@ const Game = ({location}) => {
     });
 
     return () => {
-      socket.emit('disconnect');
+      socket.emit('disconnected');
       socket.off();
     }
   }, [ENDPOINT, location.search])
@@ -97,6 +97,10 @@ const Game = ({location}) => {
     };
   }
 
+  const leaveGame = () => {
+    history.goBack();
+  }
+
   return (
     <div style={{justifyContent: "center", textAlign: "center"}}>
       <div style={{marginBottom: 20}}>
@@ -116,7 +120,7 @@ const Game = ({location}) => {
           name={name}
         />
       </div>
-      <Button variant="contained" color="secondary">
+      <Button variant="contained" color="secondary" onClick={() => leaveGame()}>
           Leave Game
       </Button>
     </div> 

@@ -59,7 +59,7 @@ io.on('connection', (socket: Socket) => {
     callback();
   });
 
-  socket.on('disconnect', () => {
+  socket.on('disconnected', () => {
     console.log("connection has been disconnected!");
   })
 });
