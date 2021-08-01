@@ -1,16 +1,7 @@
 import React, { useState } from 'react';
-import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
-import Grid from '@material-ui/core/Grid';
 import SportsVolleyballIcon from '@material-ui/icons/SportsVolleyball';
-import Typography from '@material-ui/core/Typography';
-import { makeStyles } from '@material-ui/core/styles';
 import { Link } from 'react-router-dom';
-
-import RoomList from './RoomList';
+import { Avatar, Button, CssBaseline, TextField, Paper, Grid, makeStyles, Typography, Container, Box } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -35,7 +26,7 @@ const useStyles = makeStyles((theme) => ({
     backgroundColor: theme.palette.secondary.main,
   },
   form: {
-    width: '100%', // Fix IE 11 issue.
+    width: '50%', // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
   submit: {
@@ -52,19 +43,15 @@ const Join = () => {
   const shouldDisableEnterButton = ((name && name.length > 0) && (room && room.length > 0)) ? false : true
 
   return (
-    <Grid container component="main" className={classes.root}>
+    <div>
       <CssBaseline />
-      <Grid item xs={false} sm={4} md={7} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
-        <RoomList/>
-      </Grid>
-      <Grid item xs={12} sm={8} md={5} component={Paper} elevation={6} square>
-        <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <SportsVolleyballIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Welcome to Slime Volleyball
-          </Typography>
+      <div className={classes.paper}>
+        <Avatar className={classes.avatar}>
+          <SportsVolleyballIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Welcome to Slime Volleyball
+        </Typography>
           <form className={classes.form} noValidate>
             <TextField
               variant="outlined"
@@ -104,8 +91,7 @@ const Join = () => {
             </Link>
           </form>
         </div>
-      </Grid>
-    </Grid>
+    </div>
   );
 }
 

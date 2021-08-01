@@ -121,7 +121,7 @@ const Game = ({location, history}) => {
               name={name}
             /> :
             <div>
-              <CircularProgress size={60} style={{marginRight: 30}}/>
+              <CircularProgress size={60} style={{marginRight: 30, marginTop: 80}}/>
               <Typography display="inline" color='primary' variant="h5">
                 Waiting For Opponent...
               </Typography>
