@@ -50,10 +50,10 @@ io.on('connection', (socket: Socket) => {
 
   socket.on('sendMove', (message, callback) => {
     const player = getPlayer(socket.id);
-    console.log(`Server: ${message} was called`);
     io.to(player.room).emit('message', {
       player: player.name,
       move: message,
+      numberOfPlayers: getPlayersInRoom(player.room).length,
     });
 
     callback();

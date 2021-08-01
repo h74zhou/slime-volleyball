@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import queryString from 'query-string';
 import io from 'socket.io-client';
 import Canvas from './Canvas';
-import Button from '@material-ui/core/Button';
+import {Button, CircularProgress, Typography} from '@material-ui/core';
 
 let socket;
 
@@ -54,10 +54,10 @@ const Game = ({location, history}) => {
 
 
   useEffect(() => {
-    socket.on('message', ({player, move}: {player: string, move: string}) => {
-      // Player 1 Moved
-      console.log(`Player who made this move was: ${player}`);
-      if (player === firstPlayer) {
+    socket.on('message', ({player, move, numberOfPlayers}: {player: string, move: string, numberOfPlayers: number}) => {
+
+      if (player === firstPlayer && numberOfPlayers >= 2) {
+        // Player 1 Moved
         if (move === ARROW_UP) {
           setPressUp(prev => prev + 1);
         } else if (move === ARROW_LEFT) {
@@ -67,8 +67,7 @@ const Game = ({location, history}) => {
         } else if (move === RELEASE) {
           setRelease(prev => prev + 1);
         }
-        console.log(`Player pressed: ${move}`)
-      } else if (player === secondPlayer) {
+      } else if (player === secondPlayer && numberOfPlayers >= 2) {
         // Player 2 Moved
         if (move === ARROW_UP) {
           setPressUpTwo(prev => prev + 1);
@@ -104,21 +103,30 @@ const Game = ({location, history}) => {
   return (
     <div style={{justifyContent: "center", textAlign: "center"}}>
       <div style={{marginBottom: 20}}>
-        <Canvas
-          sendMove={sendMove}
-          upPressed={pressUp}
-          upPressedTwo={pressUpTwo}
-          leftPressed={pressLeft}
-          leftPressedTwo={pressLeftTwo}
-          rightPressed={pressRight}
-          rightPressedTwo={pressRightTwo}
-          released={release}
-          releasedTwo={releaseTwo}
-          socket={socket}
-          firstPlayer={firstPlayer}
-          secondPlayer={secondPlayer}
-          name={name}
-        />
+        {
+          firstPlayer != null && secondPlayer != null ?
+            <Canvas
+              sendMove={sendMove}
+              upPressed={pressUp}
+              upPressedTwo={pressUpTwo}
+              leftPressed={pressLeft}
+              leftPressedTwo={pressLeftTwo}
+              rightPressed={pressRight}
+              rightPressedTwo={pressRightTwo}
+              released={release}
+              releasedTwo={releaseTwo}
+              socket={socket}
+              firstPlayer={firstPlayer}
+              secondPlayer={secondPlayer}
+              name={name}
+            /> :
+            <div>
+              <CircularProgress size={60} style={{marginRight: 30}}/>
+              <Typography display="inline" color='primary' variant="h5">
+                Waiting For Opponent...
+              </Typography>
+            </div>
+        }
       </div>
       <Button variant="contained" color="secondary" onClick={() => leaveGame()}>
           Leave Game
