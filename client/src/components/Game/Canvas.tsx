@@ -1,19 +1,18 @@
 import { useRef, useEffect } from 'react'
 import useKeyPress from './useKeyPress';
 
-const MAX_VELOCITY = 10;
 const PLAYER_ONE_ORIGINAL_X = 120;
 const PLAYER_TWO_ORIGINAL_X = 880;
 const PLAYER_ORIGINAL_Y = 600;
 const BALL_STARTING_HEIGHT = 100;
 const NET_STARTING_X_VALUE = 490;
 const NET_WIDTH = 20;
+const BALL_ORIGINAL_DY = 5;
 
 const Canvas = props => {
   const keyUp = useKeyPress('ArrowUp');
   const keyLeft = useKeyPress('ArrowLeft');
   const keyRight = useKeyPress('ArrowRight');
-  const keyRefresh = useKeyPress('r');
   const { 
     sendMove, 
     upPressed, 
@@ -30,6 +29,11 @@ const Canvas = props => {
     name,
     sendBallMove,
     ballMove,
+    refreshGame,
+    sendRestartGame,
+    setFirstPlayerScore,
+    setSecondPlayerScore,
+    refresh,
     ...otherProps 
   } = props;
 
@@ -67,7 +71,7 @@ const Canvas = props => {
     y: BALL_STARTING_HEIGHT,
     speed: 15,
     dx: 0,
-    dy: 5,
+    dy: BALL_ORIGINAL_DY,
   });
 
   const netRef = useRef({
@@ -108,8 +112,7 @@ const Canvas = props => {
     }
 
     if (canvasRef.current != null && volleyBallRef.current.y > canvasRef.current?.height - volleyBallRef.current.h) {
-      // resetGame();
-      volleyBallRef.current.dy *= -1;
+      resetGame();
     }
 
     if (ballCollisionPlayer1()) {
@@ -148,8 +151,10 @@ const Canvas = props => {
     // Update Score
     if (canvasRef.current && volleyBallRef.current.x < canvasRef.current?.width / 2) {
       secondPlayerScoreRef.current += 1;
+      setSecondPlayerScore(secondPlayerScoreRef.current);
     } else {
       firstPlayerScoreRef.current += 1;
+      setFirstPlayerScore(firstPlayerScoreRef.current);
     }
 
     // Reset the Location of Objects
@@ -244,33 +249,6 @@ const Canvas = props => {
     return (x*x+y*y<=(volleyBallRef.current.w * volleyBallRef.current.w));
   };
 
-  const newCollisionAngle = (playerRef) => {
-    var xDiff = volleyBallRef.current.x - playerRef.current.x;
-    var yDiff = volleyBallRef.current.y - playerRef.current.y;
-    var absVelocity = Math.abs(volleyBallRef.current.dx) + Math.abs(volleyBallRef.current.dy);
-
-    if (absVelocity > MAX_VELOCITY) {
-      absVelocity = MAX_VELOCITY
-    }
-
-    if (xDiff === 0) {
-      volleyBallRef.current.dy = -1 * absVelocity;
-    } else if (yDiff === 0) {
-      volleyBallRef.current.dx = absVelocity;
-    } else {
-      const angle = Math.atan2(xDiff, yDiff);
-      volleyBallRef.current.dx = -1 * absVelocity * Math.cos(angle);
-      volleyBallRef.current.dy = -1 * absVelocity * Math.sin(angle);
-      if (xDiff < 0) {
-        volleyBallRef.current.dx = volleyBallRef.current.dx * -1;
-        volleyBallRef.current.dy = volleyBallRef.current.dy * -1;
-      }
-    }
-
-    volleyBallRef.current.dx += playerRef.current.dx / 2;
-    volleyBallRef.current.dy += playerRef.current.dy / 2;
-  };
-
   const drawFirstPlayer = ctx => {
     ctx.beginPath();
     ctx.arc(firstPlayerRef.current.x, firstPlayerRef.current.y, firstPlayerRef.current.w, 0, Math.PI, true);
@@ -309,12 +287,8 @@ const Canvas = props => {
     ctx.fillStyle = '#006400';
     if (firstPlayerScoreRef.current >= 5) {
       ctx.fillText("Player 1 Wins", ctx.canvas.width / 2, 50);
-      ctx.font = '20px arial';
-      ctx.fillText(`Press R to Restart the Game`, ctx.canvas.width / 2, 80);
     } else if (secondPlayerScoreRef.current >= 5) {
       ctx.fillText("Player 2 Wins", ctx.canvas.width / 2, 50);
-      ctx.font = '20px arial';
-      ctx.fillText(`Press R to Restart the Game`, ctx.canvas.width / 2, 80);
     } else {
       ctx.fillText(`${firstPlayerScoreRef.current} - ${secondPlayerScoreRef.current}`, ctx.canvas.width / 2, 50);
     }
@@ -375,13 +349,6 @@ const Canvas = props => {
   }, [keyUp, firstPlayer, secondPlayer]);
 
   useEffect(() => {
-    if (firstPlayerScoreRef.current >= 5 || secondPlayerScoreRef.current >= 5) {
-      firstPlayerScoreRef.current = 0;
-      secondPlayerScoreRef.current = 0;
-    }
-  }, [keyRefresh])
-
-  useEffect(() => {
     if (upPressed) {
       firstPlayerRef.current.dy = -5;
     }
@@ -392,6 +359,12 @@ const Canvas = props => {
       secondPlayerRef.current.dy = -5;
     }
   }, [upPressedTwo]);
+
+  useEffect(() => {
+    firstPlayerScoreRef.current = 0;
+    secondPlayerScoreRef.current = 0;
+    volleyBallRef.current.dy = BALL_ORIGINAL_DY;
+  }, [refresh]);
 
   useEffect(() => {
     if (canvasRef.current) {

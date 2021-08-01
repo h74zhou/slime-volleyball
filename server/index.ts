@@ -58,10 +58,8 @@ io.on('connection', (socket: Socket) => {
   });
 
   socket.on('sendBallMove', ({ballMove, playerCollided} : {ballMove: ballMoveType, playerCollided: playerCollidedType}) => {
-    console.log("Server received sendBallMove event from client");
     const player = getPlayer(socket.id);
     if (ballMove && playerCollided && player.name == playerCollided.name) {
-      console.log("Server sucks");
       const ballData = getNewVolleyBallData(ballMove, playerCollided);
       io.to(player.room).emit('ballMove', {
         x: ballData.x,
@@ -70,6 +68,11 @@ io.on('connection', (socket: Socket) => {
         dy: ballData.dy,
       });
     }
+  });
+
+  socket.on('sendRestartGame', () => {
+    const player = getPlayer(socket.id);
+    io.to(player.room).emit('restartGame');
   });
 
   socket.on('disconnected', () => {

@@ -48,6 +48,11 @@ const Game = ({location, history}) => {
     dy: 5,
   });
 
+  // Game Score State
+  const [firstPlayerScore, setFirstPlayerScore] = useState<number>(0);
+  const [secondPlayerScore, setSecondPlayerScore] = useState<number>(0);
+  const [refresh, setRefresh] = useState<number>(0);
+
   const ENDPOINT = 'localhost:5000';
 
   const ARROW_UP = 'ArrowUp';
@@ -74,17 +79,6 @@ const Game = ({location, history}) => {
       socket.off();
     }
   }, [ENDPOINT, location.search])
-
-  useEffect(() => {
-    socket.on('ballMove', (ballMove : ballMoveType) => {
-      setBallMove({
-        x: ballMove.x,
-        y: ballMove.y,
-        dx: ballMove.dx,
-        dy: ballMove.dy,
-      });
-    });
-  }, []);
 
   useEffect(() => {
     socket.on('message', ({player, move, numberOfPlayers}: {player: string, move: string, numberOfPlayers: number}) => {
@@ -147,6 +141,18 @@ const Game = ({location, history}) => {
     }
   };
 
+  const sendRestartGame = () => {
+    socket.emit('sendRestartGame');
+  }
+
+  useEffect(() => {
+    socket.on('restartGame', () => {
+      setFirstPlayerScore(0);
+      setSecondPlayerScore(0);
+      setRefresh(prev => prev + 1);
+    })
+  }, []);
+
   const leaveGame = () => {
     history.goBack();
   }
@@ -172,6 +178,10 @@ const Game = ({location, history}) => {
               name={name}
               sendBallMove={sendBallMove}
               ballMove={ballMove}
+              sendRestartGame={sendRestartGame}
+              setFirstPlayerScore={setFirstPlayerScore}
+              setSecondPlayerScore={setSecondPlayerScore}
+              refresh={refresh}
             /> :
             <div>
               <CircularProgress size={60} style={{marginRight: 30, marginTop: 80}}/>
@@ -181,9 +191,19 @@ const Game = ({location, history}) => {
             </div>
         }
       </div>
-      <Button variant="contained" color="secondary" onClick={() => leaveGame()}>
-          Leave Game
-      </Button>
+      <div style={{marginBottom: 20}}>
+        <Button variant="contained" color="secondary" onClick={() => leaveGame()}>
+            Leave Game
+        </Button>
+      </div>
+      {
+        (firstPlayerScore >= 5 || secondPlayerScore >= 5) &&
+        <div>
+          <Button variant="contained" color="primary" onClick={() => sendRestartGame()}>
+              Restart Game
+          </Button>
+        </div>
+      }
     </div> 
   )
 }
