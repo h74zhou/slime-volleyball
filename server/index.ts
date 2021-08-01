@@ -1,6 +1,7 @@
 import express = require('express');
 import { Server, Socket } from "socket.io";
 import http from "http";
+import cors from "cors";
 import type { playerType, ballMoveType, playerCollidedType } from "./players";
 
 const { addPlayer, removePlayer, getPlayer, getPlayersInRoom, getNewVolleyBallData } = require('./players.ts');
@@ -10,6 +11,7 @@ const PORT = process.env.PORT || 5000;
 const router = require('./router');
 
 const app = express();
+
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
@@ -76,11 +78,13 @@ io.on('connection', (socket: Socket) => {
   });
 
   socket.on('disconnected', () => {
+    removePlayer(socket.id);
     console.log("connection has been disconnected!");
   })
 });
 
 app.use(router);
+app.use(cors());
 
 server.listen(PORT, () => console.log(`Server has started on port ${PORT}`));
 
