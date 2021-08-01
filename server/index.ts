@@ -1,9 +1,9 @@
 import express = require('express');
 import { Server, Socket } from "socket.io";
 import http from "http";
-import type { playerType } from "./players"; 
+import type { playerType, ballMoveType, playerCollidedType } from "./players";
 
-const { addPlayer, removePlayer, getPlayer, getPlayersInRoom } = require('./players.ts');
+const { addPlayer, removePlayer, getPlayer, getPlayersInRoom, getNewVolleyBallData } = require('./players.ts');
 
 const PORT = process.env.PORT || 5000;
 
@@ -48,15 +48,28 @@ io.on('connection', (socket: Socket) => {
     }
   });
 
-  socket.on('sendMove', (message, callback) => {
+  socket.on('sendMove', (message) => {
     const player = getPlayer(socket.id);
     io.to(player.room).emit('message', {
       player: player.name,
       move: message,
       numberOfPlayers: getPlayersInRoom(player.room).length,
     });
+  });
 
-    callback();
+  socket.on('sendBallMove', ({ballMove, playerCollided} : {ballMove: ballMoveType, playerCollided: playerCollidedType}) => {
+    console.log("Server received sendBallMove event from client");
+    const player = getPlayer(socket.id);
+    if (ballMove && playerCollided && player.name == playerCollided.name) {
+      console.log("Server sucks");
+      const ballData = getNewVolleyBallData(ballMove, playerCollided);
+      io.to(player.room).emit('ballMove', {
+        x: ballData.x,
+        y: ballData.y,
+        dx: ballData.dx,
+        dy: ballData.dy,
+      });
+    }
   });
 
   socket.on('disconnected', () => {

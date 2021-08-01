@@ -28,6 +28,8 @@ const Canvas = props => {
     firstPlayer,
     secondPlayer,
     name,
+    sendBallMove,
+    ballMove,
     ...otherProps 
   } = props;
 
@@ -105,17 +107,40 @@ const Canvas = props => {
       volleyBallRef.current.dy *= -1;
     }
 
-    if (ballCollisionPlayer1()) {
-      newCollisionAngle(firstPlayerRef);
-    } else if (ballCollisionPlayer2()) {
-      newCollisionAngle(secondPlayerRef);
-    } else if (ballCollisionNet()) {
-      volleyBallRef.current.dx *= -1;
+    if (canvasRef.current != null && volleyBallRef.current.y > canvasRef.current?.height - volleyBallRef.current.h) {
+      // resetGame();
       volleyBallRef.current.dy *= -1;
     }
 
-    if (canvasRef.current != null && volleyBallRef.current.y > canvasRef.current?.height - volleyBallRef.current.h) {
-      resetGame();
+    if (ballCollisionPlayer1()) {
+      sendBallMove({
+        x: volleyBallRef.current.x,
+        y: volleyBallRef.current.y,
+        dx: volleyBallRef.current.dx,
+        dy: volleyBallRef.current.dy,
+      }, {
+        x: firstPlayerRef.current.x,
+        y: firstPlayerRef.current.y,
+        dx: firstPlayerRef.current.dx,
+        dy: firstPlayerRef.current.dy,
+        name: firstPlayer,
+      });
+    } else if (ballCollisionPlayer2()) {
+      sendBallMove({
+        x: volleyBallRef.current.x,
+        y: volleyBallRef.current.y,
+        dx: volleyBallRef.current.dx,
+        dy: volleyBallRef.current.dy,
+      }, {
+        x: secondPlayerRef.current.x,
+        y: secondPlayerRef.current.y,
+        dx: secondPlayerRef.current.dx,
+        dy: secondPlayerRef.current.dy,
+        name: secondPlayer,
+      });
+    } else if (ballCollisionNet()) {
+      volleyBallRef.current.dx *= -1;
+      volleyBallRef.current.dy *= -1;
     }
   };
 
@@ -305,7 +330,14 @@ const Canvas = props => {
     if (socket != null && !keyLeft && !keyRight) {
       sendMove('StopHorizontal');
     }
-  }, [keyLeft, keyRight])
+  }, [keyLeft, keyRight]);
+
+  useEffect(() => {
+    volleyBallRef.current.x = ballMove.x;
+    volleyBallRef.current.y = ballMove.y;
+    volleyBallRef.current.dx = ballMove.dx;
+    volleyBallRef.current.dy = ballMove.dy;
+  }, [ballMove]);
 
   useEffect(() => {
     firstPlayerRef.current.dx = -firstPlayerRef.current.speed

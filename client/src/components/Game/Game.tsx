@@ -3,8 +3,24 @@ import queryString from 'query-string';
 import io from 'socket.io-client';
 import Canvas from './Canvas';
 import {Button, CircularProgress, Typography} from '@material-ui/core';
+import { PlayCircleOutlineRounded } from '@material-ui/icons';
 
 let socket;
+
+type ballMoveType = {
+  x: number,
+  y: number,
+  dx: number,
+  dy: number,
+}
+
+type playerType = {
+  x: number,
+  y: number,
+  dx: number,
+  dy: number,
+  name: string,
+}
 
 const Game = ({location, history}) => {
   const [name, setName] = useState<string | null>('');
@@ -23,6 +39,14 @@ const Game = ({location, history}) => {
   const [pressRightTwo, setPressRightTwo] = useState<number>(0);
   const [pressLeftTwo, setPressLeftTwo] = useState<number>(0);
   const [releaseTwo, setReleaseTwo] = useState<number>(0);
+
+  // VolleyBall
+  const [ballMove, setBallMove] = useState<ballMoveType>({
+    x: 120,
+    y: 100,
+    dx: 0,
+    dy: 5,
+  });
 
   const ENDPOINT = 'localhost:5000';
 
@@ -51,7 +75,16 @@ const Game = ({location, history}) => {
     }
   }, [ENDPOINT, location.search])
 
-
+  useEffect(() => {
+    socket.on('ballMove', (ballMove : ballMoveType) => {
+      setBallMove({
+        x: ballMove.x,
+        y: ballMove.y,
+        dx: ballMove.dx,
+        dy: ballMove.dy,
+      });
+    });
+  }, []);
 
   useEffect(() => {
     socket.on('message', ({player, move, numberOfPlayers}: {player: string, move: string, numberOfPlayers: number}) => {
@@ -88,13 +121,31 @@ const Game = ({location, history}) => {
 
   }, [name, firstPlayer, secondPlayer])
 
+  useEffect(() => {
+    socket.on('ballMove', (ballMove: ballMoveType) => {
+      setBallMove({
+        x: ballMove.x,
+        y: ballMove.y,
+        dx: ballMove.dx,
+        dy: ballMove.dy,
+      });
+    })
+  }, [])
+
   const sendMove = (move) => {
     if (move) {
-      socket.emit('sendMove', move, () => {
-        console.log("SendMove Callback called!");
-      });
+      socket.emit('sendMove', move);
     };
   }
+
+  const sendBallMove = (ballMove : ballMoveType, playerCollided: playerType) => {
+    if (ballMove) {
+      socket.emit('sendBallMove', {
+        ballMove: ballMove,
+        playerCollided: playerCollided,
+      });
+    }
+  };
 
   const leaveGame = () => {
     history.goBack();
@@ -119,6 +170,8 @@ const Game = ({location, history}) => {
               firstPlayer={firstPlayer}
               secondPlayer={secondPlayer}
               name={name}
+              sendBallMove={sendBallMove}
+              ballMove={ballMove}
             /> :
             <div>
               <CircularProgress size={60} style={{marginRight: 30, marginTop: 80}}/>
