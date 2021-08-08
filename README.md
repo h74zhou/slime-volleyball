@@ -2,6 +2,10 @@
 
 Welcome to my online slime volleyball game! This is a web app that allows 2 players to play slime volleyball together in real-time! Users can battle each other within dedicated rooms and see who is truly the slime volleyball champion!
 
+## Project Outline
+
+This project is currently deployed on Netlify and can be seen on this link: https://online-slime-volleyball.netlify.app/
+
 ### Login
 
 When you first arrive onto the web app, you will see a login page. You can enter your name and the room number and then press join. Please note that you cannot join a room that already has 2 players. You can also not use the same name as the other person in the room.
@@ -22,6 +26,6 @@ Once a winner is decided, a new button will appear to allow you to restart the g
 
 <img src="/images/WInGame.png">
 
-### Tech Stack
+## Tech Stack
 
-The frontend UI was built using [React](https://reactjs.org/) and [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API). The physics engine for this game was developed from scratch using first principles. The collision angle calculations were derived using `Math.tan`, `Math.cos` and existing velocity for the slime and volleyball. The backend was built with [Express](https://expressjs.com/) and packaged by [Node](https://nodejs.org/en/). [SocketIO](https://socket.io/) was used to sync the player and ball movements, enabling real-time gameplay!
+The frontend UI was built using [React](https://reactjs.org/), [Material-UI](https://material-ui.com/) and [Canvas API](https://developer.mozilla.org/en-US/docs/Web/API/Canvas_API). The physics engine for this game was developed from scratch using first principles. The collision angle calculations were derived using `Math.tan`, `Math.cos` and existing velocity for the slime and volleyball. The backend was built with [Express](https://expressjs.com/) and packaged by [Node](https://nodejs.org/en/). [SocketIO](https://socket.io/) was used to sync the player and ball movements, enabling real-time gameplay! 
