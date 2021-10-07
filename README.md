@@ -2,10 +2,6 @@
 
 Welcome to my online slime volleyball game! This is a web app that allows 2 players to play slime volleyball together in real-time! Users can battle each other within dedicated rooms and see who is truly the slime volleyball champion!
 
-## Project Outline
-
-This project is currently deployed on Netlify and can be seen on this link: https://online-slime-volleyball.netlify.app/
-
 ### Login
 
 When you first arrive onto the web app, you will see a login page. You can enter your name and the room number and then press join. Please note that you cannot join a room that already has 2 players. You can also not use the same name as the other person in the room.
